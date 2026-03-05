@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Craft icon">
+  <rect width="64" height="64" rx="14" fill="#e0f2fe"/>
+  <circle cx="24" cy="26" r="10" fill="#0ea5e9"/>
+  <circle cx="38" cy="38" r="12" fill="#14b8a6"/>
+  <path d="M12 46c6-5 14-5 20 0" stroke="#0f172a" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M34 18c6-5 12-4 18 2" stroke="#0f172a" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>
