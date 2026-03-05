@@ -1,0 +1,33 @@
+{{ define "main" }}
+<section class="max-w-5xl mx-auto px-4 py-10">
+  <div class="mb-10 rounded-3xl border border-neutral-200 dark:border-neutral-700 p-6 md:p-8 bg-neutral-50/80 dark:bg-neutral-900/50">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-semibold tracking-tight">{{ .Title }}</h1>
+      {{ with .Description }}
+        <p class="mt-2 text-base opacity-85 max-w-xl">{{ . }}</p>
+      {{ end }}
+    </div>
+  </div>
+
+  <div class="mt-8 flex flex-wrap justify-start items-start" style="gap:10px; padding:10px;">
+    <a href="/organics/" class="grid place-items-center flex-none rounded-lg border border-neutral-200 dark:border-neutral-700 p-1 bg-neutral-100/80 dark:bg-neutral-800/70 hover:border-neutral-300 dark:hover:border-neutral-500 transition-colors overflow-hidden text-center" style="width:6cm;height:4cm;min-width:6cm;max-width:6cm;min-height:4cm;max-height:4cm;box-sizing:border-box;">
+      <div class="flex flex-col items-center justify-center leading-none">
+        <img src="https://img.icons8.com/color/48/honeycomb.png" onerror="this.onerror=null;this.src='/images/icons/organics-fallback.svg';" alt="Organics icon" class="w-4 h-4 shrink-0" />
+        <span class="text-[9px] font-medium mt-1">Organics</span>
+      </div>
+    </a>
+    <a href="/craft/" class="grid place-items-center flex-none rounded-lg border border-neutral-200 dark:border-neutral-700 p-1 bg-neutral-100/80 dark:bg-neutral-800/70 hover:border-neutral-300 dark:hover:border-neutral-500 transition-colors overflow-hidden text-center" style="width:6cm;height:4cm;min-width:6cm;max-width:6cm;min-height:4cm;max-height:4cm;box-sizing:border-box;">
+      <div class="flex flex-col items-center justify-center leading-none">
+        <img src="https://img.icons8.com/color/48/yarn.png" onerror="this.onerror=null;this.src='/images/icons/craft-fallback.svg';" alt="Craft icon" class="w-4 h-4 shrink-0" />
+        <span class="text-[9px] font-medium mt-1">Craft</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="mt-12 rounded-3xl border border-neutral-200 dark:border-neutral-700 p-6 md:p-8 bg-white/70 dark:bg-neutral-900/40">
+    <div class="prose dark:prose-invert max-w-none">
+      {{ .Content }}
+    </div>
+  </div>
+</section>
+{{ end }}

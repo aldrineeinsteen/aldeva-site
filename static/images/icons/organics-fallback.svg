@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Organics icon">
+  <rect width="64" height="64" rx="14" fill="#fef3c7"/>
+  <path d="M20 38c8-1 15-8 16-17 6 5 9 12 7 20-2 7-8 12-16 13-7 1-14-2-19-8 5-4 9-7 12-8Z" fill="#22c55e"/>
+  <circle cx="24" cy="24" r="6" fill="#84cc16"/>
+</svg>

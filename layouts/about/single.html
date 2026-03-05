@@ -1,0 +1,17 @@
+{{ define "main" }}
+<article class="max-w-3xl mx-auto px-4 py-10">
+  <header class="mb-8">
+    <h1 class="text-3xl md:text-4xl font-semibold tracking-tight">{{ .Title }}</h1>
+    {{ with .Params.role }}
+      <p class="mt-2 text-base opacity-80">{{ . }}</p>
+    {{ end }}
+    {{ with .Params.photo }}
+      <img src="{{ . }}" alt="{{ $.Title }} photo" class="mt-5 w-36 h-36 object-cover rounded-2xl border border-neutral-200 dark:border-neutral-700" />
+    {{ end }}
+  </header>
+
+  <div class="prose dark:prose-invert max-w-none">
+    {{ .Content }}
+  </div>
+</article>
+{{ end }}

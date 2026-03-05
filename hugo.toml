@@ -1,0 +1,23 @@
+baseURL = "https://aldeva.co/"
+languageCode = "en-gb"
+title = "Ald Eva"
+theme = "blowfish"
+
+[params]
+  description = "Ald & Eva — Organics, Craft, and Profiles"
+  logo = "img/logo-generated.svg"
+  disableTextInHeader = true
+
+[menu]
+  [[menu.main]]
+    name = "Organics"
+    pageRef = "/organics"
+    weight = 10
+  [[menu.main]]
+    name = "Craft"
+    pageRef = "/craft"
+    weight = 20
+  [[menu.main]]
+    name = "About"
+    pageRef = "/about"
+    weight = 30
