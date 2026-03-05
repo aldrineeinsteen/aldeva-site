@@ -1,6 +1,7 @@
 {{ define "main" }}
 {{ $colonies := where .Site.RegularPages "Type" "colonies" }}
-{{ $colonies = sort $colonies "Params.hive_id" "asc" }}
+{{ $colonies = sort $colonies "Params.colony_id" "asc" }}
+{{ $paginator := .Paginate $colonies 6 }}
 
 <section class="max-w-6xl mx-auto px-4 py-10">
   <div class="mb-8 rounded-3xl border border-neutral-200 dark:border-neutral-700 p-6 md:p-8 bg-cover bg-center" style="background-image: linear-gradient(rgba(15, 23, 42, 0.35), rgba(15, 23, 42, 0.2)), url('/images/photos/open-2.jpg');">
@@ -15,22 +16,76 @@
     </div>
   </div>
 
-  <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-    {{ range $colonies }}
-      <a href="{{ .RelPermalink }}" class="block rounded-2xl border border-neutral-200 dark:border-neutral-700 p-5 hover:border-neutral-300 dark:hover:border-neutral-500 transition-colors">
-        <div class="flex items-center justify-between gap-3">
-          <h2 class="text-lg font-semibold">{{ .Params.hive_id }}</h2>
-          <span class="text-xs rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">{{ .Params.status }}</span>
-        </div>
-        <dl class="mt-4 space-y-2 text-sm opacity-90">
-          <div class="flex justify-between gap-4"><dt>Queen year</dt><dd>{{ .Params.queen_year }}</dd></div>
-          <div class="flex justify-between gap-4"><dt>Last updated</dt><dd>{{ .Params.last_updated }}</dd></div>
-          <div><dt>Location</dt><dd class="mt-1">{{ .Params.location }}</dd></div>
-        </dl>
+  <h2 class="text-2xl font-semibold tracking-tight mb-4">Colonies</h2>
+
+  <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+    {{ range $paginator.Pages }}
+      {{ $status := lower (string .Params.status) }}
+      {{ $statusLabel := "Weak" }}
+      {{ if eq $status "strong" }}{{ $statusLabel = "Strong" }}{{ end }}
+      {{ if eq $status "moderate" }}{{ $statusLabel = "Moderate" }}{{ end }}
+      {{ if eq $status "week" }}{{ $statusLabel = "Weak" }}{{ end }}
+      {{ if eq $status "weak" }}{{ $statusLabel = "Weak" }}{{ end }}
+      {{ if eq $status "needs attention" }}{{ $statusLabel = "Weak" }}{{ end }}
+
+      {{ $w3wRaw := .Params.what3words | default .Params.location }}
+      {{ $w3wClean := replaceRE "^///" "" (string $w3wRaw) }}
+      {{ $w3wDisplay := printf "///%s" $w3wClean }}
+
+      <a href="{{ .RelPermalink }}" class="block no-underline" style="padding: 5px;">
+        <article class="rounded-2xl border border-neutral-200 dark:border-neutral-700 p-4 hover:border-neutral-300 dark:hover:border-neutral-500 transition-colors h-full">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="text-lg font-semibold">{{ .Params.colony_id }}</h3>
+            {{ if eq $statusLabel "Strong" }}
+              <span class="inline-flex items-center justify-center h-7 px-3 text-xs font-semibold leading-none whitespace-nowrap shrink-0 rounded-full border" style="min-width: 88px; background-color: #dcfce7; border-color: #86efac; color: #166534;">{{ $statusLabel }}</span>
+            {{ else if eq $statusLabel "Moderate" }}
+              <span class="inline-flex items-center justify-center h-7 px-3 text-xs font-semibold leading-none whitespace-nowrap shrink-0 rounded-full border" style="min-width: 88px; background-color: #fef3c7; border-color: #fcd34d; color: #92400e;">{{ $statusLabel }}</span>
+            {{ else }}
+              <span class="inline-flex items-center justify-center h-7 px-3 text-xs font-semibold leading-none whitespace-nowrap shrink-0 rounded-full border" style="min-width: 88px; background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;">{{ $statusLabel }}</span>
+            {{ end }}
+          </div>
+          <dl class="mt-4 space-y-2 text-sm opacity-90">
+            <div class="flex justify-between gap-4"><dt>Colony type</dt><dd>{{ .Params.hive_type }}</dd></div>
+            <div class="flex justify-between gap-4"><dt>Queen year</dt><dd>{{ .Params.queen_year }}</dd></div>
+            <div class="flex justify-between gap-4"><dt>Last updated</dt><dd>{{ .Params.last_updated }}</dd></div>
+            <div>
+              <dt>Location</dt>
+              <dd class="mt-1">{{ $w3wDisplay }}</dd>
+            </div>
+          </dl>
+        </article>
       </a>
     {{ else }}
-      <p class="opacity-80">No colonies found. Add hive pages under <code>content/organics/colonies/</code>.</p>
+      <p class="opacity-80">No colonies found. Add colony pages under <code>content/organics/colonies/</code>.</p>
     {{ end }}
   </div>
+
+  {{ if gt $paginator.TotalPages 1 }}
+    <nav class="mt-8" aria-label="Colony pages">
+      <ul class="flex items-center justify-center gap-2 text-sm">
+        {{ if $paginator.HasPrev }}
+          <li>
+            <a href="{{ $paginator.Prev.URL }}" rel="prev" aria-label="Go to previous page" class="px-3 py-1 rounded border border-neutral-300 dark:border-neutral-600 hover:border-neutral-400 dark:hover:border-neutral-500">Previous</a>
+          </li>
+        {{ end }}
+
+        {{ range $paginator.Pagers }}
+          <li>
+            {{ if eq . $paginator }}
+              <span aria-current="page" class="px-3 py-1 rounded border border-neutral-400 dark:border-neutral-500 font-semibold">{{ .PageNumber }}</span>
+            {{ else }}
+              <a href="{{ .URL }}" aria-label="Go to page {{ .PageNumber }}" class="px-3 py-1 rounded border border-neutral-300 dark:border-neutral-600 hover:border-neutral-400 dark:hover:border-neutral-500">{{ .PageNumber }}</a>
+            {{ end }}
+          </li>
+        {{ end }}
+
+        {{ if $paginator.HasNext }}
+          <li>
+            <a href="{{ $paginator.Next.URL }}" rel="next" aria-label="Go to next page" class="px-3 py-1 rounded border border-neutral-300 dark:border-neutral-600 hover:border-neutral-400 dark:hover:border-neutral-500">Next</a>
+          </li>
+        {{ end }}
+      </ul>
+    </nav>
+  {{ end }}
 </section>
 {{ end }}

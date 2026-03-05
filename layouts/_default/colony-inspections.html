@@ -1,0 +1,98 @@
+{{ define "main" }}
+{{ $inspections := where .Site.RegularPages "Section" "inspections" }}
+{{ $inspections = where $inspections "Params.colony_id" .Params.colony_id }}
+{{ $inspections = sort $inspections "Date" "desc" }}
+{{ $currentYear := now.Format "2006" }}
+{{ $currentYearInspections := slice }}
+{{ $years := slice }}
+{{ range $inspections }}
+  {{ $year := .Date.Format "2006" }}
+  {{ if eq $year $currentYear }}
+    {{ $currentYearInspections = $currentYearInspections | append . }}
+  {{ end }}
+  {{ if not (in $years $year) }}
+    {{ $years = $years | append $year }}
+  {{ end }}
+{{ end }}
+
+<section class="max-w-5xl mx-auto px-4 py-10">
+  <div class="mb-8 flex items-center justify-between gap-3">
+    <div>
+      <h1 class="text-3xl md:text-4xl font-semibold tracking-tight">{{ .Title }}</h1>
+      <p class="mt-2 text-base opacity-80">Full records for colony {{ .Params.colony_id }}.</p>
+    </div>
+    <a href="/organics/" class="text-sm rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors">Back to colonies</a>
+  </div>
+
+  <section class="mb-8">
+    <h2 class="text-2xl font-semibold mb-4">{{ $currentYear }} inspections</h2>
+    <p class="text-sm opacity-80 mb-4">Showing 4 inspections for {{ $currentYear }}.</p>
+    <div class="space-y-4">
+      {{ range first 4 $currentYearInspections }}
+        <article class="rounded-2xl border border-neutral-200 dark:border-neutral-700 p-5">
+          <div class="flex items-center justify-between gap-2">
+            <p class="text-sm font-medium">{{ .Date.Format "2006-01-02" }}</p>
+            <span class="text-xs rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 leading-none">{{ .Params.colony_id }}</span>
+          </div>
+          <p class="mt-3 text-sm">{{ .Params.public_summary }}</p>
+          <div class="mt-4 flex flex-wrap gap-2 text-xs">
+            <span class="rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 leading-none">Queen: {{ cond .Params.queen_seen "Seen" "Not seen" }}</span>
+            <span class="rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 leading-none">Eggs: {{ cond .Params.eggs_seen "Seen" "Not seen" }}</span>
+            <span class="rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 leading-none">Brood: {{ .Params.brood_pattern }}</span>
+            <span class="rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 leading-none">Varroa: {{ .Params.varroa_count }}</span>
+            <span class="rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 leading-none">{{ delimit .Params.actions ", " }}</span>
+          </div>
+        </article>
+      {{ else }}
+        <p class="text-sm opacity-80">No inspection records available for {{ $currentYear }}.</p>
+      {{ end }}
+    </div>
+  </section>
+
+  <section class="mb-8 rounded-2xl border border-neutral-200 dark:border-neutral-700 p-5">
+    <h2 class="text-2xl font-semibold mb-4">Year arccolony</h2>
+    <div class="flex flex-wrap gap-2 text-xs">
+      {{ range $years }}
+        <a href="#year-{{ . }}" class="rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 leading-none hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors">{{ . }}</a>
+      {{ else }}
+        <span class="rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 leading-none">No arccolony years</span>
+      {{ end }}
+    </div>
+  </section>
+
+  <section class="space-y-8">
+    {{ range $years }}
+      {{ $year := . }}
+      <div id="year-{{ $year }}" class="scroll-mt-28">
+        <h3 class="text-xl font-semibold mb-4">{{ $year }}</h3>
+        <div class="space-y-4">
+          {{ range $inspections }}
+            {{ if eq (.Date.Format "2006") $year }}
+              <article class="rounded-2xl border border-neutral-200 dark:border-neutral-700 p-5">
+                <div class="flex items-center justify-between gap-2">
+                  <p class="text-sm font-medium">{{ .Date.Format "2006-01-02" }}</p>
+                  <span class="text-xs rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 leading-none">{{ .Params.colony_id }}</span>
+                </div>
+                <p class="mt-3 text-sm">{{ .Params.public_summary }}</p>
+                <div class="mt-4 flex flex-wrap gap-2 text-xs">
+                  <span class="rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 leading-none">Queen: {{ cond .Params.queen_seen "Seen" "Not seen" }}</span>
+                  <span class="rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 leading-none">Eggs: {{ cond .Params.eggs_seen "Seen" "Not seen" }}</span>
+                  <span class="rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 leading-none">Brood: {{ .Params.brood_pattern }}</span>
+                  <span class="rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 leading-none">Varroa: {{ .Params.varroa_count }}</span>
+                  <span class="rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 leading-none">{{ delimit .Params.actions ", " }}</span>
+                </div>
+              </article>
+            {{ end }}
+          {{ end }}
+        </div>
+      </div>
+    {{ end }}
+  </section>
+
+  <div class="space-y-4">
+    {{ if eq (len $inspections) 0 }}
+      <p class="text-sm opacity-80">No inspection records available for this colony.</p>
+    {{ end }}
+  </div>
+</section>
+{{ end }}

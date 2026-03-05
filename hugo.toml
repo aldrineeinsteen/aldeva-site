@@ -10,14 +10,23 @@ theme = "blowfish"
 
 [menu]
   [[menu.main]]
-    name = "Organics"
-    pageRef = "/organics"
+    name = "Business"
+    pageRef = "/business"
     weight = 10
   [[menu.main]]
     name = "Craft"
     pageRef = "/craft"
-    weight = 20
+    parent = "Business"
+    weight = 11
+  [[menu.main]]
+    name = "Organics"
+    pageRef = "/organics"
+    parent = "Business"
+    weight = 12
   [[menu.main]]
     name = "About"
     pageRef = "/about"
     weight = 30
+
+[taxonomies]
+  tag = "tags"

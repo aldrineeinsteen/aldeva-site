@@ -1,6 +1,6 @@
 ---
 title: "Colonies"
-description: "Hive profiles and condition snapshots."
+description: "Colony profiles and condition snapshots."
 ---
 
-Browse all colonies and open each hive for inspection detail.
+Browse all colonies and open each colony for inspection detail.

@@ -1,7 +1,7 @@
 {{ define "main" }}
 {{ $inspections := where .Site.RegularPages "Section" "inspections" }}
-{{ with .Params.hive_id }}
-  {{ $inspections = where $inspections "Params.hive_id" . }}
+{{ with .Params.colony_id }}
+  {{ $inspections = where $inspections "Params.colony_id" . }}
 {{ end }}
 {{ $inspections = sort $inspections "Date" "desc" }}
 
@@ -18,7 +18,7 @@
       <article class="rounded-2xl border border-neutral-200 dark:border-neutral-700 p-5">
         <div class="flex items-center justify-between gap-2">
           <p class="text-sm font-medium">{{ .Date.Format "2006-01-02" }}</p>
-          <span class="text-xs rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">{{ .Params.hive_id }}</span>
+          <span class="text-xs rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">{{ .Params.colony_id }}</span>
         </div>
         <p class="mt-3 text-sm">{{ .Params.public_summary }}</p>
         <div class="mt-4 flex flex-wrap gap-2 text-xs">
@@ -26,7 +26,7 @@
           <span class="rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">Eggs: {{ cond .Params.eggs_seen "Seen" "Not seen" }}</span>
           <span class="rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">Brood: {{ .Params.brood_pattern }}</span>
           <span class="rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">Varroa: {{ .Params.varroa_count }}</span>
-          <span class="rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">Actions: {{ delimit .Params.actions ", " }}</span>
+          <span class="rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">{{ delimit .Params.actions ", " }}</span>
         </div>
       </article>
     {{ else }}

@@ -1,20 +1,61 @@
 {{ define "main" }}
 {{ $inspections := where .Site.RegularPages "Section" "inspections" }}
-{{ $inspections = where $inspections "Params.hive_id" .Params.hive_id }}
+{{ $inspections = where $inspections "Params.colony_id" .Params.colony_id }}
 {{ $inspections = sort $inspections "Date" "desc" }}
 {{ $latest := first 1 $inspections }}
 {{ $recent := first 7 $inspections }}
-{{ $historyPage := first 1 (where (where .Site.RegularPages "Layout" "hive-inspections") "Params.hive_id" .Params.hive_id) }}
+{{ $historyPage := first 1 (where (where .Site.RegularPages "Layout" "colony-inspections") "Params.colony_id" .Params.colony_id) }}
+{{ $status := lower (string .Params.status) }}
+{{ $statusLabel := "Weak" }}
+{{ if eq $status "strong" }}{{ $statusLabel = "Strong" }}{{ end }}
+{{ if eq $status "moderate" }}{{ $statusLabel = "Moderate" }}{{ end }}
+{{ if eq $status "week" }}{{ $statusLabel = "Weak" }}{{ end }}
+{{ if eq $status "weak" }}{{ $statusLabel = "Weak" }}{{ end }}
+{{ if eq $status "needs attention" }}{{ $statusLabel = "Weak" }}{{ end }}
+{{ $queenYear := int (.Params.queen_year | default 0) }}
+{{ $queenRemainder := mod $queenYear 5 }}
+{{ $markLabel := "Blue" }}
+{{ $markStyle := "background-color: #dbeafe; border-color: #93c5fd; color: #1e3a8a;" }}
+{{ if eq $queenRemainder 1 }}
+  {{ $markLabel = "White" }}
+  {{ $markStyle = "background-color: #f8fafc; border-color: #cbd5e1; color: #334155;" }}
+{{ else if eq $queenRemainder 2 }}
+  {{ $markLabel = "Yellow" }}
+  {{ $markStyle = "background-color: #fef3c7; border-color: #fcd34d; color: #92400e;" }}
+{{ else if eq $queenRemainder 3 }}
+  {{ $markLabel = "Red" }}
+  {{ $markStyle = "background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;" }}
+{{ else if eq $queenRemainder 4 }}
+  {{ $markLabel = "Green" }}
+  {{ $markStyle = "background-color: #dcfce7; border-color: #86efac; color: #166534;" }}
+{{ end }}
 
 <section class="max-w-5xl mx-auto px-4 py-10">
   <header class="mb-8 rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6">
     <div class="flex flex-wrap items-center gap-3 justify-between">
-      <h1 class="text-3xl font-semibold tracking-tight">Hive {{ .Params.hive_id }}</h1>
-      <span class="text-xs rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">{{ .Params.status }}</span>
+      <h1 class="text-3xl font-semibold tracking-tight">Colony {{ .Params.colony_id }}</h1>
+      <div class="flex flex-wrap items-center gap-2">
+        {{ if eq $statusLabel "Strong" }}
+          <span class="inline-flex items-center justify-center h-7 px-3 text-xs font-semibold leading-none whitespace-nowrap shrink-0 rounded-lg border" style="min-width: 88px; background-color: #dcfce7; border-color: #86efac; color: #166534;">{{ $statusLabel }}</span>
+        {{ else if eq $statusLabel "Moderate" }}
+          <span class="inline-flex items-center justify-center h-7 px-3 text-xs font-semibold leading-none whitespace-nowrap shrink-0 rounded-lg border" style="min-width: 88px; background-color: #fef3c7; border-color: #fcd34d; color: #92400e;">{{ $statusLabel }}</span>
+        {{ else }}
+          <span class="inline-flex items-center justify-center h-7 px-3 text-xs font-semibold leading-none whitespace-nowrap shrink-0 rounded-lg border" style="min-width: 88px; background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;">{{ $statusLabel }}</span>
+        {{ end }}
+        {{ range .Params.tags }}
+          <span class="inline-flex items-center justify-center h-7 px-3 text-xs font-semibold leading-none whitespace-nowrap shrink-0 rounded-lg border border-neutral-300 dark:border-neutral-600">{{ . | title }}</span>
+        {{ end }}
+      </div>
     </div>
     <dl class="mt-5 grid gap-3 sm:grid-cols-2 text-sm opacity-90">
-      <div><dt class="font-medium">Queen year</dt><dd>{{ .Params.queen_year }}</dd></div>
-      <div><dt class="font-medium">Hive type</dt><dd>{{ .Params.hive_type }}</dd></div>
+      <div>
+        <dt class="font-medium">Queen year</dt>
+        <dd class="flex items-center gap-2">
+          <span>{{ .Params.queen_year }}</span>
+          <span class="inline-flex items-center justify-center h-7 px-3 text-xs font-semibold leading-none whitespace-nowrap shrink-0 rounded-lg border" style="{{ $markStyle }}">Marked: {{ $markLabel }}</span>
+        </dd>
+      </div>
+      <div><dt class="font-medium">Colony type</dt><dd>{{ .Params.hive_type }}</dd></div>
       <div><dt class="font-medium">Temperament</dt><dd>{{ .Params.temperament }}</dd></div>
       <div><dt class="font-medium">Last updated</dt><dd>{{ .Params.last_updated }}</dd></div>
       <div class="sm:col-span-2"><dt class="font-medium">Location</dt><dd>{{ .Params.location }}</dd></div>
@@ -24,22 +65,64 @@
   <section class="mb-8">
     <h2 class="text-2xl font-semibold mb-4">Latest inspection summary</h2>
     {{ range $latest }}
+      {{ $queenStyle := "background-color: #dcfce7; border-color: #86efac; color: #166534;" }}
+      {{ if not .Params.queen_seen }}{{ $queenStyle = "background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;" }}{{ end }}
+      {{ $eggsStyle := "background-color: #dcfce7; border-color: #86efac; color: #166534;" }}
+      {{ if not .Params.eggs_seen }}{{ $eggsStyle = "background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;" }}{{ end }}
+      {{ $brood := lower (string .Params.brood_pattern) }}
+      {{ $broodStyle := "background-color: #fef3c7; border-color: #fcd34d; color: #92400e;" }}
+      {{ if eq $brood "good" }}{{ $broodStyle = "background-color: #dcfce7; border-color: #86efac; color: #166534;" }}{{ end }}
+      {{ if eq $brood "patchy" }}{{ $broodStyle = "background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;" }}{{ end }}
+      {{ $varroa := int (.Params.varroa_count | default 0) }}
+      {{ $varroaStyle := "background-color: #dcfce7; border-color: #86efac; color: #166534;" }}
+      {{ $varroaRisk := "Low" }}
+      {{ if ge $varroa 7 }}
+        {{ $varroaStyle = "background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;" }}
+        {{ $varroaRisk = "High" }}
+      {{ else if ge $varroa 4 }}
+        {{ $varroaStyle = "background-color: #fef3c7; border-color: #fcd34d; color: #92400e;" }}
+        {{ $varroaRisk = "Watch" }}
+      {{ end }}
       <article class="rounded-2xl border border-neutral-200 dark:border-neutral-700 p-5">
         <div class="flex items-center justify-between gap-2">
           <p class="text-sm font-medium">{{ .Date.Format "2006-01-02" }}</p>
-          <span class="text-xs rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">{{ .Params.hive_id }}</span>
         </div>
         <p class="mt-3 text-sm">{{ .Params.public_summary }}</p>
-        <div class="mt-4 flex flex-wrap gap-2 text-xs">
-          <span class="rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">Queen: {{ cond .Params.queen_seen "Seen" "Not seen" }}</span>
-          <span class="rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">Eggs: {{ cond .Params.eggs_seen "Seen" "Not seen" }}</span>
-          <span class="rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">Brood: {{ .Params.brood_pattern }}</span>
-          <span class="rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">Varroa: {{ .Params.varroa_count }}</span>
-          <span class="rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">Actions: {{ delimit .Params.actions ", " }}</span>
+        <div class="mt-4 flex flex-wrap text-xs" style="gap: 5px;">
+          {{ if .Params.queen_seen }}
+            <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #dcfce7; border-color: #86efac; color: #166534;">Queen: Seen</span>
+          {{ else }}
+            <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;">Queen: Not seen</span>
+          {{ end }}
+
+          {{ if .Params.eggs_seen }}
+            <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #dcfce7; border-color: #86efac; color: #166534;">Eggs: Seen</span>
+          {{ else }}
+            <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #fef3c7; border-color: #fcd34d; color: #92400e;">Eggs: Not seen</span>
+          {{ end }}
+
+          {{ if eq $brood "good" }}
+            <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #dcfce7; border-color: #86efac; color: #166534;">Brood: {{ .Params.brood_pattern }}</span>
+          {{ else if eq $brood "patchy" }}
+            <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;">Brood: {{ .Params.brood_pattern }}</span>
+          {{ else }}
+            <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #fef3c7; border-color: #fcd34d; color: #92400e;">Brood: {{ .Params.brood_pattern }}</span>
+          {{ end }}
+
+          {{ if ge $varroa 7 }}
+            <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;">Varroa: {{ .Params.varroa_count }} ({{ $varroaRisk }})</span>
+          {{ else if ge $varroa 4 }}
+            <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #fef3c7; border-color: #fcd34d; color: #92400e;">Varroa: {{ .Params.varroa_count }} ({{ $varroaRisk }})</span>
+          {{ else }}
+            <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #dcfce7; border-color: #86efac; color: #166534;">Varroa: {{ .Params.varroa_count }} ({{ $varroaRisk }})</span>
+          {{ end }}
+        </div>
+        <div class="mt-[5px] flex flex-wrap text-xs" style="gap: 5px;">
+          <span class="rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 leading-none">{{ delimit .Params.actions ", " }}</span>
         </div>
       </article>
     {{ else }}
-      <p class="text-sm opacity-80">No inspections logged yet for this hive.</p>
+      <p class="text-sm opacity-80">No inspections logged yet for this colony.</p>
     {{ end }}
   </section>
 
@@ -47,18 +130,60 @@
     <h2 class="text-2xl font-semibold mb-4">Recent inspections</h2>
     <div class="space-y-4">
       {{ range $recent }}
+        {{ $queenStyle := "background-color: #dcfce7; border-color: #86efac; color: #166534;" }}
+        {{ if not .Params.queen_seen }}{{ $queenStyle = "background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;" }}{{ end }}
+        {{ $eggsStyle := "background-color: #dcfce7; border-color: #86efac; color: #166534;" }}
+        {{ if not .Params.eggs_seen }}{{ $eggsStyle = "background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;" }}{{ end }}
+        {{ $brood := lower (string .Params.brood_pattern) }}
+        {{ $broodStyle := "background-color: #fef3c7; border-color: #fcd34d; color: #92400e;" }}
+        {{ if eq $brood "good" }}{{ $broodStyle = "background-color: #dcfce7; border-color: #86efac; color: #166534;" }}{{ end }}
+        {{ if eq $brood "patchy" }}{{ $broodStyle = "background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;" }}{{ end }}
+        {{ $varroa := int (.Params.varroa_count | default 0) }}
+        {{ $varroaStyle := "background-color: #dcfce7; border-color: #86efac; color: #166534;" }}
+        {{ $varroaRisk := "Low" }}
+        {{ if ge $varroa 7 }}
+          {{ $varroaStyle = "background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;" }}
+          {{ $varroaRisk = "High" }}
+        {{ else if ge $varroa 4 }}
+          {{ $varroaStyle = "background-color: #fef3c7; border-color: #fcd34d; color: #92400e;" }}
+          {{ $varroaRisk = "Watch" }}
+        {{ end }}
         <article class="rounded-2xl border border-neutral-200 dark:border-neutral-700 p-5">
           <div class="flex items-center justify-between gap-2">
             <p class="text-sm font-medium">{{ .Date.Format "2006-01-02" }}</p>
-            <span class="text-xs rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">{{ .Params.hive_id }}</span>
           </div>
           <p class="mt-3 text-sm">{{ .Params.public_summary }}</p>
-          <div class="mt-4 flex flex-wrap gap-2 text-xs">
-            <span class="rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">Queen: {{ cond .Params.queen_seen "Seen" "Not seen" }}</span>
-            <span class="rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">Eggs: {{ cond .Params.eggs_seen "Seen" "Not seen" }}</span>
-            <span class="rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">Brood: {{ .Params.brood_pattern }}</span>
-            <span class="rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">Varroa: {{ .Params.varroa_count }}</span>
-            <span class="rounded-full border border-neutral-300 dark:border-neutral-600 px-2.5 py-1">Actions: {{ delimit .Params.actions ", " }}</span>
+          <div class="mt-4 flex flex-wrap text-xs" style="gap: 5px;">
+            {{ if .Params.queen_seen }}
+              <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #dcfce7; border-color: #86efac; color: #166534;">Queen: Seen</span>
+            {{ else }}
+              <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;">Queen: Not seen</span>
+            {{ end }}
+
+            {{ if .Params.eggs_seen }}
+              <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #dcfce7; border-color: #86efac; color: #166534;">Eggs: Seen</span>
+            {{ else }}
+              <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #fef3c7; border-color: #fcd34d; color: #92400e;">Eggs: Not seen</span>
+            {{ end }}
+
+            {{ if eq $brood "good" }}
+              <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #dcfce7; border-color: #86efac; color: #166534;">Brood: {{ .Params.brood_pattern }}</span>
+            {{ else if eq $brood "patchy" }}
+              <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;">Brood: {{ .Params.brood_pattern }}</span>
+            {{ else }}
+              <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #fef3c7; border-color: #fcd34d; color: #92400e;">Brood: {{ .Params.brood_pattern }}</span>
+            {{ end }}
+
+            {{ if ge $varroa 7 }}
+              <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;">Varroa: {{ .Params.varroa_count }} ({{ $varroaRisk }})</span>
+            {{ else if ge $varroa 4 }}
+              <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #fef3c7; border-color: #fcd34d; color: #92400e;">Varroa: {{ .Params.varroa_count }} ({{ $varroaRisk }})</span>
+            {{ else }}
+              <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #dcfce7; border-color: #86efac; color: #166534;">Varroa: {{ .Params.varroa_count }} ({{ $varroaRisk }})</span>
+            {{ end }}
+          </div>
+          <div class="mt-[5px] flex flex-wrap text-xs" style="gap: 5px;">
+            <span class="rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 leading-none">{{ delimit .Params.actions ", " }}</span>
           </div>
         </article>
       {{ else }}
@@ -67,9 +192,34 @@
     </div>
   </section>
 
+  <section class="mb-8 rounded-2xl border border-neutral-200 dark:border-neutral-700 p-5">
+    <h2 class="text-2xl font-semibold mb-4">Colour index & tags</h2>
+    <div class="grid gap-5 md:grid-cols-2 text-sm">
+      <div>
+        <h3 class="font-medium mb-2">Inspection colour logic</h3>
+        <div class="flex flex-wrap gap-2 text-xs">
+          <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #dcfce7; border-color: #86efac; color: #166534;">Green: Queen/Eggs seen, Brood good, Varroa low</span>
+          <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #fef3c7; border-color: #fcd34d; color: #92400e;">Amber: Eggs not seen, Brood mixed, Varroa watch</span>
+          <span class="rounded-lg border px-3 py-1.5 leading-none font-medium" style="background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;">Red: Queen not seen, Brood patchy, Varroa high</span>
+          <span class="rounded-lg border px-3 py-1.5 leading-none">Varroa thresholds: Low 0–3, Watch 4–6, High 7+</span>
+        </div>
+      </div>
+      <div>
+        <h3 class="font-medium mb-2">Colony tags</h3>
+        <div class="flex flex-wrap gap-2 text-xs">
+          {{ range .Params.tags }}
+            <span class="rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 leading-none">{{ . | title }}</span>
+          {{ else }}
+            <span class="rounded-lg border border-neutral-300 dark:border-neutral-600 px-3 py-1.5 leading-none">No tags</span>
+          {{ end }}
+        </div>
+      </div>
+    </div>
+  </section>
+
   {{ with $historyPage }}
     {{ $page := index . 0 }}
-    <a href="{{ $page.RelPermalink }}" class="inline-flex rounded-full border border-neutral-300 dark:border-neutral-600 px-4 py-2 text-sm hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors">Show more</a>
+    <a href="{{ $page.RelPermalink }}" class="inline-flex rounded-lg border border-neutral-300 dark:border-neutral-600 px-4 py-2 text-sm hover:border-neutral-400 dark:hover:border-neutral-500 transition-colors">Show more</a>
   {{ end }}
 </section>
 {{ end }}
