@@ -31,8 +31,10 @@ jobs:
           hugo-version: ${{ env.HUGO_VERSION }}
           extended: true
 
-      - name: Build with Hugo
-        run: hugo --gc --minify
+      - name: Build with Hugo (project Pages URL)
+        run: |
+          rm -f static/CNAME
+          hugo --gc --minify --baseURL "https://aldrineeinsteen.github.io/aldeva-site/"
 
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
